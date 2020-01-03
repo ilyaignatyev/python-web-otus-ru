@@ -12,15 +12,7 @@ import requests
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 
-YANDEX_SEARCH_PARAMS = {
-    # Шаблон поискового запроса
-    'url': 'https://yandex.ru/search/?text={}&p={}',
-
-    # CSS-класс, присутствующий в ссылке, являющейся результатом поиска
-    'link_class': 'organic__url'
-}
-
-DEFAULT_LINK_LIMIT = 10
+from .constants import YANDEX_SEARCH_PARAMS, DEFAULT_LINK_LIMIT
 
 
 class LinkSearch:
@@ -83,13 +75,13 @@ class LinkSearch:
 
         # Выбираем произвольные User-Agent и Proxy
         html = None
-        user_agents = self.user_agents.random
+        user_agent = self.user_agents.random
         proxies = None
         if self.proxies:
             proxy = self.proxies[random.randint(0, len(self.proxies) - 1)]
             proxies = {'http': f'http://{proxy}', 'https': f'http://{proxy}'}
 
-        headers = {'User-Agent': user_agents}
+        headers = {'User-Agent': user_agent}
         try:
             response = requests.get(url, headers=headers, proxies=proxies)
             html = response.text
@@ -107,12 +99,11 @@ class LinkSearch:
                 continue
 
             link = tag['href']
-
-            if not link or link == '#' or link.find('javascript:') == 0:
+            parsed_link = urlparse(link)
+            if not (parsed_link.netloc or parsed_link.path):
                 continue
 
             # Относительные ссылки преобразуем к абсолютным
-            parsed_link = urlparse(link)
             if not parsed_link.scheme and not parsed_link.netloc:
                 link = (f'{parsed_url.scheme}://' if parsed_url.scheme else '') + f'{parsed_url.netloc}/{link}'
 

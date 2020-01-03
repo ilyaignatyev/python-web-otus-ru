@@ -1,4 +1,4 @@
-from link_search import LinkSearch
+from link_search.link_search import LinkSearch
 
 # Строка поиска
 search_string = 'динозавры'
