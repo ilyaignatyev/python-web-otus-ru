@@ -1,0 +1,4 @@
+.idea
+link_search/dist
+link_search/link_search.egg-info
+link_search/link_search/__pycache__
