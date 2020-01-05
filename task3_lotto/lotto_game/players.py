@@ -9,7 +9,6 @@ import random
 
 from lotto_game.cards import Card
 from lotto_game.constants import COMPUTER_MISTAKE_CHANCE
-from lotto_game.input_output import InputOutput
 
 
 class Player(ABC):
@@ -74,17 +73,34 @@ class Player(ABC):
         """
 
 
+class NoInputOutput(Exception):
+    """
+    Исключение при отсутствии класса ввода-вывода
+    """
+    pass
+
+
 class Person(Player):
     """
     Человек-игрок
     """
+    def __init__(self, name, input_output):
+        """
+        :param name: Имя
+        :param input_output: Класс ввода данных
+        """
+        super().__init__(name)
+        self.__input_output = input_output
+
     def make_step(self, number) -> bool:
         """
         Ход человека
         :param number: Число
         :return: Закрашивает или нет
         """
-        step = InputOutput.get_step(number)
+        if self.__input_output is None:
+            raise NoInputOutput('Не указан класс ввода-вывода данных.')
+        step = self.__input_output.get_step(number)
         if step:
             self.card.mark_number(number)
         return step
@@ -94,6 +110,14 @@ class Computer(Player):
     """
     Компьютер-игрок
     """
+    def __init__(self, name, mistake_chance):
+        """
+        :param name: Имя
+        :param mistake_chance: Вероятность ошибки в процентах
+        """
+        super().__init__(name)
+        self.__mistake_chance = mistake_chance
+
     def make_step(self, number):
         """
         Ход
@@ -101,7 +125,8 @@ class Computer(Player):
         :return: Закрашивает или нет
         """
         contains = self.card.contains(number)
-        step = not contains if random.randint(1, 100 // COMPUTER_MISTAKE_CHANCE) == 1 else contains
+        step = not contains if self.__mistake_chance and random.randint(1, 100 // self.__mistake_chance) == 1 \
+            else contains
         if step:
             self.card.mark_number(number)
         return step

@@ -26,6 +26,14 @@ class Master:
         self.__cards = Cards()
         self.__player_cards = {}
 
+    @property
+    def player_cards(self) -> dict:
+        """
+        Возвращает карточки игроков
+        :return: Карточки
+        """
+        return self.__player_cards
+
     def get_number_sequence(self):
         """
         Генератор последовательности чисел

@@ -32,7 +32,7 @@ class Card:
         Возвращает множество чисел на карточке
         :return: Числа
         """
-        return set(number for row in self.__numbers for number in row if number is not None)
+        return set(number for row in self.__numbers for number in row if number not in [None, X_NUMBER])
 
     def contains(self, number: int) -> bool:
         """
@@ -82,15 +82,18 @@ class Cards:
             used_numbers = []
             for row in range(CARD_ROW_COUNT):
                 col_filled = 0
-                while col_filled <= NUMBERS_IN_ROW:
+                while col_filled < NUMBERS_IN_ROW:
                     number = random.randint(MIN_NUMBER, MAX_NUMBER)
                     if number not in used_numbers:
-                        used_numbers.append(number)
-                        col_filled += 1
                         # Распределяем числа по столбцам десятками:
                         # 1 столбец - от 1 до 9, 2-ой - от 10 до 19, и т.д. В последний столбец помещаем все числа,
                         # которые не влезают в заданное количество столбцов.
                         column = (number // 10) if number < CARD_COL_COUNT * 10 else (CARD_COL_COUNT - 1)
+                        if card[row][column] is not None:
+                            continue
+
+                        used_numbers.append(number)
+                        col_filled += 1
                         card[row][column] = number
 
             exists_similar = False

@@ -4,4 +4,4 @@
 
 __author__ = 'Игнатьев И.В.'
 
-from lotto_game.game import game
+from lotto_game.game import Game

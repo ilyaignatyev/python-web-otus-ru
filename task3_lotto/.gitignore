@@ -1,2 +1,3 @@
 .idea
 lotto_game/__pycache__
+tests/.pytest_cache
