@@ -8,9 +8,9 @@ from lotto_game import Game
 from lotto_game.cards import Cards, Card
 from lotto_game.constants import MIN_NUMBER, MAX_NUMBER, CARD_ROW_COUNT, CARD_COL_COUNT, NUMBERS_IN_ROW, \
     COMPUTER_MISTAKE_CHANCE
+from lotto_game.input_output import InputOutput
 from lotto_game.master import Master
 from lotto_game.players import Person, Computer
-from lotto_game.input_output import InputOutput
 
 
 @pytest.fixture(scope='module')

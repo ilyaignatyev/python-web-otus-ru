@@ -2,3 +2,4 @@
 link_search/dist
 link_search/link_search.egg-info
 link_search/link_search/__pycache__
+tests/.pytest_cache

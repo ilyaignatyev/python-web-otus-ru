@@ -35,7 +35,7 @@ class LinkSearch:
         :param deep: Глубокий поиск (переходить на сайты, являющиеся результатом поиска, и искать ссылки на них)
         :return: Ссылки
         """
-        if not search_string:
+        if not search_string or not link_count or link_count < 0 or not isinstance(link_count, int):
             return []
 
         search_page = 0
@@ -70,7 +70,7 @@ class LinkSearch:
         :param link_limit: Максимальное количество результатов
         :return: Список ссылок
         """
-        if not url:
+        if not url or not link_limit or link_limit < 0 or not isinstance(link_limit, int):
             return []
 
         # Выбираем произвольные User-Agent и Proxy
