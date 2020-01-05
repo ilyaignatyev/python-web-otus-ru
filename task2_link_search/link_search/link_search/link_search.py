@@ -62,6 +62,35 @@ class LinkSearch:
             search_page += 1
         return links[:link_count]
 
+    @staticmethod
+    def prepare_link(link, opener_scheme, opener_netloc):
+        """
+        Подготавливает ссылку
+        :param link: Ссылка
+        :param opener_scheme: Scheme сайта-опенеа (для преобразования относительной ссылки в абсолютную)
+        :param opener_netloc: Netloc сайта-опенера (для преобразования относительной ссылки в абсолютную)
+        :return: Откорректированная валидная ссылка
+        """
+        parsed_link = urlparse(link)
+
+        if not (parsed_link.netloc or parsed_link.path):
+            return None
+
+        # Относительные ссылки преобразуем к абсолютным
+        abs_link_created = False
+        if not parsed_link.scheme and not parsed_link.netloc:
+            abs_link_created = True
+            link = (f'{opener_scheme}://' if opener_scheme else '') + f'{opener_netloc}/{link}'
+
+        if link[:2] == '//':
+            link = link[2:]
+
+        # Добавляем схему по-умолчанию, если ее нет
+        if not parsed_link.scheme and not abs_link_created:
+            link = 'http://' + link
+
+        return link
+
     def get_site_links(self, url: str, link_class=None, link_limit=DEFAULT_LINK_LIMIT) -> list:
         """
         Возвращает список ссылок с переданного сайта
@@ -98,17 +127,9 @@ class LinkSearch:
             if link_class is not None and link_class not in (tag.get('class') or []):
                 continue
 
-            link = tag['href']
-            parsed_link = urlparse(link)
-            if not (parsed_link.netloc or parsed_link.path):
+            link = self.prepare_link(tag['href'], parsed_url.scheme, parsed_url.netloc)
+            if not link:
                 continue
-
-            # Относительные ссылки преобразуем к абсолютным
-            if not parsed_link.scheme and not parsed_link.netloc:
-                link = (f'{parsed_url.scheme}://' if parsed_url.scheme else '') + f'{parsed_url.netloc}/{link}'
-
-            if link[:2] == '//':
-                link = link[2:]
 
             links.append(link)
             if len(links) == link_limit:

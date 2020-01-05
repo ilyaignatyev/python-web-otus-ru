@@ -3,6 +3,7 @@
 """
 
 import pytest
+import validators
 
 from link_search.link_search import LinkSearch
 
@@ -53,6 +54,29 @@ def test_invalid_params(link_search):
     assert len(site_links) == 0
 
 
+def test_prepare_link(link_search):
+    """
+    Тест проверки и обработки ссылок
+    """
+    link = link_search.prepare_link('123.html', 'http', 'site.ru')
+    assert link == 'http://site.ru/123.html'
+
+    link = link_search.prepare_link('https://site1.ru/123.html', 'http', 'site.ru')
+    assert link == 'https://site1.ru/123.html'
+
+    link = link_search.prepare_link('#', 'http', 'site.ru')
+    assert link is None
+
+    link = link_search.prepare_link('javascript:', 'http', 'site.ru')
+    assert link is None
+
+    link = link_search.prepare_link('123.html?test=1#page1', 'http', 'site.ru')
+    assert link == 'http://site.ru/123.html?test=1#page1'
+
+    link = link_search.prepare_link('//en.wikipedia.org', 'http', 'site.ru')
+    assert link == 'http://en.wikipedia.org'
+
+
 def test_search(link_search):
     """
     Тест поиска
@@ -60,6 +84,7 @@ def test_search(link_search):
     search_links = link_search.get_search_links('wiki', 5, False)
     assert len(search_links) == 5
     assert len([link for link in search_links if 'wiki' not in link]) == 0
+    assert len([1 for link in search_links if validators.url(link)]) == 5
 
 
 def test_deep_search(link_search):
@@ -69,6 +94,7 @@ def test_deep_search(link_search):
     search_links = link_search.get_search_links('wiki', 5, True)
     assert len(search_links) == 5
     assert len([link for link in search_links if 'wiki' not in link]) != 0
+    assert len([1 for link in search_links if validators.url(link)]) == 5
 
 
 def test_get_site_links(link_search):
@@ -76,4 +102,5 @@ def test_get_site_links(link_search):
     Тест получения ссылок с конкретного сайта
     """
     site_links = link_search.get_site_links('http://wikipedia.org', link_limit=5)
-    assert 'en.wikipedia.org/' in site_links
+    assert 'http://en.wikipedia.org/' in site_links
+    assert len([1 for link in site_links if validators.url(link)]) == 5
