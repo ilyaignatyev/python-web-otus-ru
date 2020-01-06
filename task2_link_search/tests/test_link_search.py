@@ -79,22 +79,17 @@ def test_prepare_link(link_search):
 
 def test_search(link_search):
     """
-    Тест поиска
+    Тест поиска (обычный + глубокий)
     """
     search_links = link_search.get_search_links('wiki', 5, False)
     assert len(search_links) == 5
     assert len([link for link in search_links if 'wiki' not in link]) == 0
     assert len([1 for link in search_links if validators.url(link)]) == 5
 
-
-def test_deep_search(link_search):
-    """
-    Тест глубокого поиска
-    """
-    search_links = link_search.get_search_links('wiki', 5, True)
-    assert len(search_links) == 5
-    assert len([link for link in search_links if 'wiki' not in link]) != 0
-    assert len([1 for link in search_links if validators.url(link)]) == 5
+    search_links_deep = link_search.get_search_links('wiki', 5, True)
+    assert len(search_links_deep) == 5
+    assert set(search_links_deep) != set(search_links)
+    assert len([1 for link in search_links_deep if validators.url(link)]) == 5
 
 
 def test_get_site_links(link_search):
