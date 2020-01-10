@@ -8,7 +8,6 @@ from abc import ABC, abstractmethod
 import random
 
 from lotto_game.cards import Card
-from lotto_game.constants import COMPUTER_MISTAKE_CHANCE
 
 
 class Player(ABC):
@@ -77,7 +76,6 @@ class NoInputOutput(Exception):
     """
     Исключение при отсутствии класса ввода-вывода
     """
-    pass
 
 
 class Person(Player):
