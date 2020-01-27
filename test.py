@@ -1,3 +1,6 @@
+from task3_lotto.lotto_game import game
+game()
+
 # print('Введите строку поиска: ')
 # search_string = input()
 #
