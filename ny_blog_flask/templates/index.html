@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Блог путешественника
+{% endblock %}
+
+{% block body %}
+    {% for post in posts %}
+        {% if loop.index0 % 2 == 0 %}
+            <div class="card-deck post-card-deck">
+        {% endif %}
+
+        <div class="card post-card">
+            <div class="card-body">
+                <h5 class="card-title">{{ post['title'] }}</h5>
+                <div class="post-card__date-time text-muted">{{ post['date_time'].strftime('%d.%m.%Y %H:%M') }}</div>
+                <img class="card-img-top" src="{{ url_for('static', filename=post['img_src']) }}" alt="Изображение">
+                <p class="card-text">{{ post['short_text'] }}</p>
+                {% with tags=post['tags'] %}
+                    {% include "post_tags.html" %}
+                {% endwith %}
+                <a href="{{ url_for('posts_app.post', post_id=post['id']) }}" class="btn btn-primary">Читать далее...</a>
+            </div>
+        </div>
+
+        {% if (loop.index0 + 1) % 2 == 0 %}
+            </div>
+        {% endif %}
+    {% endfor %}
+
+{% endblock %}
