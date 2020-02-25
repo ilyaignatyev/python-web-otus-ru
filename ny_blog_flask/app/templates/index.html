@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Блог путешественника
+{% endblock %}
+
+{% block body %}
+    {% for post in posts.items %}
+        {% if loop.index0 % 2 == 0 %}
+            <div class="card-deck post-card-deck">
+        {% endif %}
+
+        <article class="card post-card">
+            <div class="card-body">
+                <h5 class="card-title">{{ post.title }}</h5>
+                <span class="post-card__date-time text-muted">{{ post.published_date_time.strftime('%d.%m.%Y %H:%M') }}</span>
+                <span class="post-card__author text-muted">{{ post.user.name }}</span>
+                {% if post.image_uuid is not none %}
+                <img class="card-img-top" src="{{ url_for('uploads', filename=post.image_uuid) }}" alt="Изображение">
+                {% endif %}
+                <p class="card-text">{{ post.short_text }}</p>
+                {% with tags=post.tags %}
+                    {% include "post_tags.html" %}
+                {% endwith %}
+                <a href="{{ url_for('post', post_id=post.id) }}" class="btn btn-primary">Читать далее...</a>
+            </div>
+        </article>
+
+        {% if ((loop.index0 + 1) % 2 == 0) or (loop.index == loop.length) %}
+            </div>
+        {% endif %}
+    {% endfor %}
+
+    {% include "navigation.html" %}
+{% endblock %}

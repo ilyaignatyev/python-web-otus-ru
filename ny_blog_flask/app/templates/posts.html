@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Список постов
+{% endblock %}
+
+{% block body %}
+    {% if user %}
+        <h4>Посты автора {{ user.name }}</h4>
+    {% endif %}
+    {% for post in posts.items %}
+        <div>
+            {% if post.published_date_time %}
+            <span class="text-secondary" title="Дата первой публикации">{{ post.published_date_time.strftime('%d.%m.%Y') }}</span>
+            {% else %}
+            <span class="text-secondary">Неопубликован</span>
+            {% endif %}
+            <a href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a>
+        </div>
+    {% endfor %}
+    {% include "navigation.html" %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}
+Авторы
+{% endblock %}
+{% block body %}
+    <div>
+        {% for user in users.items %}
+            <div>
+                <span class="text-secondary">{{ loop.index }}</span>
+                <a href="{{ url_for('posts', user_id=user.id) }}">{{ user.name }}</a>
+            </div>
+        {% endfor %}
+    </div>
+    {% include "navigation.html" %}
+{% endblock %}

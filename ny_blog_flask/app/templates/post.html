@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}
+{{ post.title }}
+{% endblock %}
+{% block body %}
+<article class="card post-card">
+    <div class="card-body">
+        <h5 class="card-title">{{ post.title }}</h5>
+        {{post.image_src}}
+
+        {% if post.published_date_time %}
+        <span class="post-card__date-time text-muted" title="Дата и время первой публикации">{{ post.published_date_time.strftime('%d.%m.%Y %H:%M') }}</span>
+        {% endif %}
+        <span class="post-card__author text-muted">{{ post.user.name }}</span>
+
+        {% if post.image_uuid is not none %}
+        <img class="card-img-top" src="{{ url_for('uploads', filename=post.image_uuid) }}" alt="Изображение">
+        {% endif %}
+
+        {% for paragraph in post.splited_text %}
+        <p class="card-text text-justify">{{ paragraph }}</p>
+        {% endfor %}
+        {% with tags=post.tags %}
+            {% include "post_tags.html" %}
+        {% endwith %}
+
+        {% if can_edit %}
+            <div class="d-flex flex-row">
+                <form action="{{ url_for('edit_post', post_id=post.id) }}" method="post" class="mr-1">
+                    <button class="btn btn-primary" type="submit">Редактировать</button>
+                </form>
+
+                <form action="{{ url_for('delete_post', post_id=post.id) }}" method="post" class="mr-1">
+                    <button class="btn btn-primary" type="submit">Удалить</button>
+                </form>
+
+                {% if post.published %}
+                <form action="{{ url_for('unpublish_post', post_id=post.id) }}" method="post">
+                    <button class="btn btn-primary" type="submit">Снять с публикации</button>
+                </form>
+                {% else %}
+                <form action="{{ url_for('publish_post', post_id=post.id) }}" method="post">
+                    <button class="btn btn-primary" type="submit">Опубликовать</button>
+                </form>
+                {% endif %}
+            </div>
+        {% endif %}
+
+    </div>
+</article>
+{% endblock %}

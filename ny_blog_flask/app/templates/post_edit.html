@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}
+{% if post %}
+   {{ post.title }}
+{% else %}
+   Новый пост
+{% endif %}
+{% endblock %}
+{% block body %}
+<div class="card post-card">
+    <div class="card-body">
+        {% if post %}
+        <form method="post" action="{{ url_for('edit_post', post_id=post.id) }}" enctype="multipart/form-data">
+        {% else %}
+        <form method="post" action="{{ url_for('add_post') }}" enctype="multipart/form-data">
+        {% endif %}
+            {{ form.csrf_token }}
+            <div class="form-group">
+                {{ form.title.label }}
+                {{ form.title(class_='form-control') }}
+            </div>
+            <div class="form-group">
+                {{ form.text.label }}
+                {{ form.text(class_='form-control', rows=10) }}
+            </div>
+            <div class="form-group">
+                {{ form.tags.label }}
+                {{ form.tags(class_='form-control') }}
+            </div>
+            {% if post and post.image_uuid is not none %}
+            <div>
+                {{ post.image_name }}
+            </div>
+            {% endif %}
+            <div class="form-group">
+                {{ form.image }}
+            </div>
+            <button class="btn btn-primary" type="submit">Сохранить</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

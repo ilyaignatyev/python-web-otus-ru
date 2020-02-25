@@ -1,0 +1,14 @@
+{% if prev_url or next_url %}
+<div class="row mt-3">
+    <nav>
+        <ul class="pagination">
+            {% if prev_url %}
+            <li class="page-item"><a class="page-link" href="{{ prev_url }}"><<</a></li>
+            {% endif %}
+            {% if next_url %}
+            <li class="page-item"><a class="page-link" href="{{ next_url }}">>></a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endif %}
