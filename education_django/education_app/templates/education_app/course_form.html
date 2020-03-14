@@ -1,0 +1,16 @@
+{% extends 'education_app\base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    Курс {{ course.name }}
+{% endblock %}
+
+{% block body %}
+    <h1>Курс</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <input type="submit" value="Сохранить">
+    </form>
+{% endblock %}

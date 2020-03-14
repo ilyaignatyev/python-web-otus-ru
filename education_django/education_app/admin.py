@@ -4,38 +4,39 @@
 
 from django.contrib import admin
 
-from .models import Course, User, Lesson, Teacher, Student, CourseEntry
-
-
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    """
-    Администрирование пользователей
-    """
-    list_display = ('id', 'name', 'surname', 'joined')
-    list_display_links = ('name',)
+from education_app.models import CourseAdmin, Administrator
+from .models import Course, Lesson, Teacher, Student, CourseEntry
 
 
 @admin.register(Teacher)
-class TeacherAdmin(admin.ModelAdmin):
+class TeacherAdministration(admin.ModelAdmin):
     """
     Администрирование учителей
     """
-    list_display = ('id', 'name', 'surname', 'joined', 'resume')
-    list_display_links = ('name',)
+    list_display = ('id', 'user', 'about')
+    list_display_links = ('user',)
 
 
 @admin.register(Student)
-class StudentAdmin(admin.ModelAdmin):
+class StudentAdministration(admin.ModelAdmin):
     """
     Администрирование студентов
     """
-    list_display = ('id', 'name', 'surname', 'joined', 'resume')
-    list_display_links = ('name',)
+    list_display = ('id', 'user', 'about')
+    list_display_links = ('user',)
+
+
+@admin.register(Administrator)
+class AdministratorAdministration(admin.ModelAdmin):
+    """
+    Администрирование студентов
+    """
+    list_display = ('id', 'user', 'about')
+    list_display_links = ('user',)
 
 
 @admin.register(Course)
-class CourseAdmin(admin.ModelAdmin):
+class CourseAdministration(admin.ModelAdmin):
     """
     Администрирование курсов
     """
@@ -44,7 +45,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 
 @admin.register(CourseEntry)
-class CourseEntryAdmin(admin.ModelAdmin):
+class CourseEntryAdministration(admin.ModelAdmin):
     """
     Администрирование записей на курс
     """
@@ -52,8 +53,17 @@ class CourseEntryAdmin(admin.ModelAdmin):
     list_display_links = ('student', 'course')
 
 
+@admin.register(CourseAdmin)
+class CourseAdminAdministration(admin.ModelAdmin):
+    """
+    Администрирование записей на курс
+    """
+    list_display = ('id', 'course', 'admin', 'start')
+    list_display_links = ('id',)
+
+
 @admin.register(Lesson)
-class LessonAdmin(admin.ModelAdmin):
+class LessonAdministration(admin.ModelAdmin):
     """
     Администрирование уроков
     """

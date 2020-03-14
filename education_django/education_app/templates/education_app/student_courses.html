@@ -1,0 +1,30 @@
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Название</th>
+        <th scope="col">Дата старта</th>
+        <th scope="col">Дата записи на курс</th>
+        <th scope="col">Стоимость</th>
+        <th scope="col">Оплата</th>
+        <th scope="col"></th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for course_entry in course_entries %}
+        <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>
+                <a href="{% url 'education_app:course' course_entry.course.id %}">{{ course_entry.course.name }}</a>
+            </td>
+            <td>{{ course_entry.course.start|date:'d.m.Y' }}</td>
+            <td>{{ course_entry.date|date:'d.m.Y' }}</td>
+            <td>{{ course_entry.cost|default_if_none:'' }}</td>
+            <td>{{ course_entry.paid|yesno:'Оплачен,Не оплачен' }}</td>
+            <td>
+                <a href="{% url 'education_app:delete_course_entry' course_entry.id %}">Удалить</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

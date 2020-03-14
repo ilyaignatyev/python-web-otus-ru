@@ -1,0 +1,17 @@
+{% extends 'education_app\base.html' %}
+{% load static %}
+
+{% block title %}
+    Преподаватели
+{% endblock %}
+
+{% block body %}
+    <h1>Преподаватели</h1>
+    <ul>
+    {% for teacher in teachers %}
+        <li>
+            <a href="{% url 'education_app:teacher' teacher.id %}">{{ teacher.user.get_full_name }}</a>
+        </li>
+    {% endfor %}
+    </ul>
+{% endblock %}

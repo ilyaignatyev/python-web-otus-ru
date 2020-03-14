@@ -1,0 +1,11 @@
+{% extends 'education_app\base.html' %}
+{% load static %}
+
+{% block title %}
+    Мои курсы
+{% endblock %}
+
+{% block body %}
+    <h1>Мои курсы</h1>
+    {% include 'education_app\student_courses.html' with course_entries=course_entries.all %}
+{% endblock %}

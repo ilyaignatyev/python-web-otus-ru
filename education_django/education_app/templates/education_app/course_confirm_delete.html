@@ -1,0 +1,17 @@
+{% extends 'education_app\base.html' %}
+{% load static %}
+
+{% block title %}
+    Курс {{ course.name }}
+{% endblock %}
+
+{% block body %}
+    <h4>Удалить курс {{ course.name }}?</h4>
+    <div class="d-flex">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Да</button>
+        </form>
+        <a class="btn btn-primary ml-1" href="{% url 'education_app:index' %}" role="button">Отмена</a>
+    </div>
+{% endblock %}

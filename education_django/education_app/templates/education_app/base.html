@@ -1,0 +1,32 @@
+{% extends 'root.html' %}
+{% load static %}
+
+{% block title %}
+    Курсы
+{% endblock %}
+
+{% block main_menu %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'education_app:index' %}">Все курсы</a>
+    </li>
+    {% if request.user.is_authenticated %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'education_app:my_courses' %}">Мои курсы</a>
+    </li>
+    {% endif %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'education_app:teachers' %}">Преподаватели</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'education_app:about' %}">О проекте</a>
+    </li>
+    {% if request.user.is_superuser %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'admin:index' %}">Админка</a>
+    </li>
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    Курсы
+{% endblock %}

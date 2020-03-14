@@ -1,0 +1,53 @@
+{% extends 'education_app\base.html' %}
+{% load static %}
+
+{% block title %}
+    Курсы
+{% endblock %}
+
+{% block body %}
+    <h1>Курсы</h1>
+
+    {% if request.user.is_superuser %}
+    <a class="btn btn-primary mb-3" href="{% url 'education_app:create_course' %}" role="button">+ Курс</a>
+    {% endif %}
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Название</th>
+            <th scope="col">Дата старта</th>
+            <th scope="col">Стоимость</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for course in courses %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ course.name }}</td>
+                <td>{{ course.start|date:'d.m.Y' }}</td>
+                <td>{{ course.cost|default_if_none:'' }}</td>
+                <td><a class="btn btn-primary btn-sm" href="{% url 'education_app:course' course.id %}" role="button">Подробнее</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% if is_paginated %}
+        <div class="">
+            <span class="">
+                <a href="{% url 'education_app:index' %}?page=1"><<</a>
+                {% if page_obj.has_previous %}
+                    <a href="{% url 'education_app:index' %}?page={{ page_obj.previous_page_number }}"><</a>
+                {% endif %}
+                <span class="">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                {% if page_obj.has_next %}
+                    <a href="{% url 'education_app:index' %}?page={{ page_obj.next_page_number }}">></a>
+                {% endif %}
+                <a href="{% url 'education_app:index' %}?page={{ page_obj.paginator.num_pages }}">>></a>
+            </span>
+        </div>
+    {% endif %}
+{% endblock %}

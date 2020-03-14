@@ -1,0 +1,30 @@
+.navbar {
+    background-image: url(../img/bg_img.png);
+}
+
+.navbar .navbar-brand {
+    font-size: 26px;
+}
+
+.auth-state {
+    position:absolute;
+    top: 5px;
+    right: 5px;
+}
+
+.auth-state__current-user-name {
+    margin-right: 5px;
+}
+
+.auth-state__login {
+    margin-right: 5px;
+}
+
+.auth-state__login:hover, .auth-state__register:hover, .auth-state__logout:hover {
+    color: rgba(0, 0, 0, 0.7);
+    text-decoration: none;
+}
+
+.auth-state__login, .auth-state__register, .auth-state__logout {
+    color: rgba(0, 0, 0, 0.5)
+}

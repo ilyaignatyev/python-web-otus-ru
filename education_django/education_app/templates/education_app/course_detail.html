@@ -1,0 +1,154 @@
+{% extends 'education_app\base.html' %}
+{% load static %}
+
+{% block title %}
+    Курс {{ course.name }}
+{% endblock %}
+
+{% block body %}
+    <h1>Курс {{ course.name }}</h1>
+    <h4 class="mt-3">Дата начала</h4>
+    <span>{{ course.start|date:'d.m.Y' }}</span>
+    <h4 class="mt-3">Описание</h4>
+    {{ course.description|linebreaks }}
+    <h4 class="mt-3">Стоимость</h4>
+    <span>{{ course.cost }}</span>
+
+    <h4 class="mt-3">Уроки</h4>
+
+    {% if rights.lesson_cud %}
+        <a class="btn btn-primary btn-sm mb-2" href="{% url 'education_app:create_lesson' course.id %}" role="button">+
+            Урок</a>
+    {% endif %}
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Название</th>
+            <th scope="col">Дата и время</th>
+            <th scope="col">Преподаватель</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for lesson in course.lesson_set.all %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td><a href="{% url 'education_app:lesson' lesson.id %}">{{ lesson.name }}</a></td>
+                <td>{{ lesson.start|date:'d.m.Y H:i' }}</td>
+                <td>
+                    {% if lesson.teacher %}
+                        <a href="{% url 'education_app:teacher' lesson.teacher.id %}">{{ lesson.teacher.user.get_full_name|default_if_none:'' }}</a>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if rights.lesson_cud %}
+                        <a class="btn btn-primary btn-sm" href="{% url 'education_app:update_lesson' lesson.id %}"
+                           role="button">Редактировать</a>
+                        <a class="btn btn-primary btn-sm" href="{% url 'education_app:delete_lesson' lesson.id %}"
+                           role="button">Удалить</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% if rights.students_v %}
+        <h4 class="mt-3">Студенты</h4>
+        {% if rights.courseentry_cud %}
+            <a class="btn btn-primary btn-sm mb-2" href="{% url 'education_app:create_course_entry' course.id %}" role="button">+
+                Студент</a>
+        {% endif %}
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">ФИО</th>
+                <th scope="col">Дата и время записи</th>
+                <th scope="col">Стоимость</th>
+                <th scope="col">Оплата</th>
+                <th scope="col"></th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for course_entry in course.courseentry_set.all %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>
+                        <a href="{% url 'education_app:student' course_entry.student.id %}">{{ course_entry.student.user.get_full_name }}</a>
+                    </td>
+                    <td>{{ course_entry.date|date:'d.m.Y H:i' }}</td>
+                    <td>{{ course_entry.cost|default_if_none:'' }}</td>
+                    <td>{{ course_entry.paid|yesno:'Оплачен,Не оплачен' }}</td>
+                    <td>
+                        {% if rights.courseentry_cud %}
+                            <a class="btn btn-primary btn-sm"
+                               href="{% url 'education_app:update_course_entry' course_entry.id %}" role="button">Редактировать</a>
+                            <a class="btn btn-primary btn-sm"
+                               href="{% url 'education_app:delete_course_entry' course_entry.id %}"
+                               role="button">Удалить</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if rights.courseadmins_v %}
+        <h4 class="mt-3">Администраторы</h4>
+        {% if rights.courseadmin_cud %}
+            <a class="btn btn-primary btn-sm mb-2" href="{% url 'education_app:create_course_admin' course.id %}"
+               role="button">+ Администратор</a>
+        {% endif %}
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">ФИО</th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for course_admin in course.courseadmin_set.all %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>
+                        <a href="{% url 'education_app:administrator' course_admin.admin.id %}">{{ course_admin.admin.user.get_full_name }}</a>
+                    </td>
+                    <td>
+                        {% if rights.courseadmin_cud %}
+                            <a class="btn btn-primary btn-sm"
+                               href="{% url 'education_app:update_course_admin' course_admin.id %}"
+                               role="button">Редактировать</a>
+                            <a class="btn btn-primary btn-sm"
+                               href="{% url 'education_app:delete_course_admin' course_admin.id %}"
+                               role="button">Удалить</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if rights.course_u %}
+        <a class="btn btn-primary" href="{% url 'education_app:update_course' course.id %}"
+           role="button">Редактировать</a>
+    {% endif %}
+
+    {% if rights.course_d %}
+        <a class="btn btn-primary" href="{% url 'education_app:delete_course' course.id %}" role="button">Удалить</a>
+    {% endif %}
+
+    {% if rights.my_courseentry_c %}
+        <a class="btn btn-primary" href="{% url 'education_app:create_my_course_entry' course.id %}" role="button">Записаться</a>
+    {% endif %}
+
+    {% if rights.my_courseentry_d %}
+        <a class="btn btn-primary" href="{% url 'education_app:delete_my_course_entry' cur_user_entry %}" role="button">Отписаться</a>
+    {% endif %}
+{% endblock %}
