@@ -8,8 +8,8 @@ from education_app.views import CourseView, CourseListView, CourseCreateView, Co
     MyCourseListView, TeacherListView, TeacherView, StudentView, CourseEntryCreateView, \
     CourseEntryUpdateView, CourseEntryDeleteView, LessonCreateView, LessonUpdateView, LessonDeleteView, \
     create_my_course_entry, CourseAdminCreateView, CourseAdminUpdateView, CourseAdminDeleteView, AdministratorView, \
-    MyCourseEntryDeleteView, LessonView
-from .views import about
+    MyCourseEntryDeleteView, LessonView, about, contacts, email_sent
+
 
 app_name = 'education_app'
 
@@ -45,4 +45,7 @@ urlpatterns = [
     path('course_admin/create/course/<int:id>', CourseAdminCreateView.as_view(), name='create_course_admin'),
     path('course_admin/update/<int:id>/', CourseAdminUpdateView.as_view(), name='update_course_admin'),
     path('course_admin/delete/<int:id>/', CourseAdminDeleteView.as_view(), name='delete_course_admin'),
+
+    path('contacts/', contacts, name='contacts'),
+    path('email_sent/', email_sent, name='email_sent'),
 ]

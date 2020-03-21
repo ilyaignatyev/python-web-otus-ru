@@ -23,6 +23,7 @@ urlpatterns = [
     # re_path(r'^', include('education_app.urls', namespace='education_app')),
     path('', include('education_app.urls', namespace='education_app')),
     path('users/', include('users.urls', namespace='users')),
+    path('django-rq/', include('django_rq.urls')),
 ]
 
 if settings.DEBUG:

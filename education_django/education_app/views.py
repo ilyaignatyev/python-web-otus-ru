@@ -12,6 +12,9 @@ from education_app.education import lesson_cud_rights, get_user_course_rights
 from education_app.forms import CourseForm, CourseEntryUpdateForm, CourseEntryCreateForm, LessonForm, \
     CourseAdminCreateForm, CourseAdminUpdateForm
 from education_app.models import CourseEntry, Lesson, CourseAdmin, Administrator
+from education_django.settings import EMAIL_HOST_USER
+from .forms import SendEmailForm
+from .send_email import send_email_async
 from .models import Course, Teacher, Student
 
 
@@ -467,3 +470,27 @@ class CourseAdminDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
         Удалять администратора курса может администратор системы
         """
         return self.request.user.is_superuser
+
+
+def contacts(request):
+    """
+    Контакты
+    """
+    if request.method == 'POST':
+        form = SendEmailForm(request.POST)
+        if form.is_valid():
+            # отправка сообщения
+            send_email_async(request.user, form.cleaned_data['message'], form.cleaned_data['theme'])
+            return HttpResponseRedirect(reverse_lazy('education_app:email_sent'))
+    else:
+        form = SendEmailForm(initial={'email': EMAIL_HOST_USER})
+
+    return render(request, 'education_app/contacts.html', {'form': form,
+                                                           'contact_email': EMAIL_HOST_USER})
+
+
+def email_sent(request):
+    """
+    Сообщение отправлено
+    """
+    return render(request, 'education_app/email_sent.html')

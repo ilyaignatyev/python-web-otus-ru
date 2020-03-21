@@ -2,7 +2,7 @@
 Формы
 """
 
-from django.forms import ModelForm
+from django.forms import ModelForm, Form, CharField, Textarea
 
 from education_app.models import Course, CourseEntry, Lesson, CourseAdmin
 
@@ -85,3 +85,11 @@ class CourseAdminUpdateForm(CourseAdminForm):
         super().__init__(*args, **kwargs)
         self.fields['course'].disabled = True
         self.fields['admin'].disabled = True
+
+
+class SendEmailForm(Form):
+    """
+    Отправка email на странице "Контакты"
+    """
+    theme = CharField(max_length=140)
+    message = CharField(widget=Textarea(attrs={'rows': 10}))
