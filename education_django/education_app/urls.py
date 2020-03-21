@@ -8,8 +8,7 @@ from education_app.views import CourseView, CourseListView, CourseCreateView, Co
     MyCourseListView, TeacherListView, TeacherView, StudentView, CourseEntryCreateView, \
     CourseEntryUpdateView, CourseEntryDeleteView, LessonCreateView, LessonUpdateView, LessonDeleteView, \
     create_my_course_entry, CourseAdminCreateView, CourseAdminUpdateView, CourseAdminDeleteView, AdministratorView, \
-    MyCourseEntryDeleteView, LessonView, about, contacts, email_sent
-
+    MyCourseEntryDeleteView, LessonView, AboutView, ContactsView, EmailSentView
 
 app_name = 'education_app'
 
@@ -27,7 +26,7 @@ urlpatterns = [
 
     path('student/<int:id>/', StudentView.as_view(), name='student'),
 
-    path('about/', about, name='about'),
+    path('about/', AboutView.as_view(), name='about'),
 
     path('course_entry/create/course/<int:id>', CourseEntryCreateView.as_view(), name='create_course_entry'),
     path('course_entry/create_my/course/<int:id>', create_my_course_entry, name='create_my_course_entry'),
@@ -46,6 +45,6 @@ urlpatterns = [
     path('course_admin/update/<int:id>/', CourseAdminUpdateView.as_view(), name='update_course_admin'),
     path('course_admin/delete/<int:id>/', CourseAdminDeleteView.as_view(), name='delete_course_admin'),
 
-    path('contacts/', contacts, name='contacts'),
-    path('email_sent/', email_sent, name='email_sent'),
+    path('contacts/', ContactsView.as_view(), name='contacts'),
+    path('email_sent/', EmailSentView.as_view(), name='email_sent'),
 ]

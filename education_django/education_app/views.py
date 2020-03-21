@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView, TemplateView, FormView
 
 from education_app.education import lesson_cud_rights, get_user_course_rights
 from education_app.forms import CourseForm, CourseEntryUpdateForm, CourseEntryCreateForm, LessonForm, \
@@ -14,8 +14,8 @@ from education_app.forms import CourseForm, CourseEntryUpdateForm, CourseEntryCr
 from education_app.models import CourseEntry, Lesson, CourseAdmin, Administrator
 from education_django.settings import EMAIL_HOST_USER
 from .forms import SendEmailForm
-from .send_email import send_email_async
 from .models import Course, Teacher, Student
+from .send_email import send_email_async
 
 
 class MyCourseListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
@@ -43,9 +43,7 @@ class CourseListView(ListView):
     model = Course
     context_object_name = 'courses'
     paginate_by = 2
-
-    def get_queryset(self):
-        return self.model.objects.filter(deleted=False)
+    queryset = Course.objects.filter(deleted=False)
 
 
 class CourseCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -108,6 +106,9 @@ class CourseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user.is_superuser
 
     def delete(self, request, *args, **kwargs):
+        """
+        Удаление в корзину
+        """
         self.object = self.get_object()
         if not self.object.deleted:
             self.object.deleted = True
@@ -191,11 +192,11 @@ class StudentView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         return False
 
 
-def about(request):
+class AboutView(TemplateView):
     """
     О проекте
     """
-    return render(request, 'education_app/about.html')
+    template_name = 'education_app/about.html'
 
 
 def create_my_course_entry(request, id=None):
@@ -472,25 +473,38 @@ class CourseAdminDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
         return self.request.user.is_superuser
 
 
-def contacts(request):
+class ContactsView(FormView):
     """
     Контакты
     """
-    if request.method == 'POST':
-        form = SendEmailForm(request.POST)
-        if form.is_valid():
-            # отправка сообщения
-            send_email_async(request.user, form.cleaned_data['message'], form.cleaned_data['theme'])
-            return HttpResponseRedirect(reverse_lazy('education_app:email_sent'))
-    else:
-        form = SendEmailForm(initial={'email': EMAIL_HOST_USER})
+    template_name = 'education_app/contacts.html'
+    success_url = reverse_lazy('education_app:email_sent')
+    form_class = SendEmailForm
 
-    return render(request, 'education_app/contacts.html', {'form': form,
-                                                           'contact_email': EMAIL_HOST_USER})
+    def form_valid(self, form):
+        """
+        Отправка сообщения
+        """
+        send_email_async(self.request.user, form.cleaned_data['message'], form.cleaned_data['theme'])
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        """
+        Добавляем в контекст контактный email
+        """
+        context = super().get_context_data(**kwargs)
+        context['contact_email'] = EMAIL_HOST_USER
+        return context
+
+    def test_func(self) -> bool:
+        """
+        Отправлять сообщения могут только аутентифицированные пользователи
+        """
+        return self.request.user.is_authenicated
 
 
-def email_sent(request):
+class EmailSentView(TemplateView):
     """
     Сообщение отправлено
     """
-    return render(request, 'education_app/email_sent.html')
+    template_name = 'education_app/email_sent.html'
