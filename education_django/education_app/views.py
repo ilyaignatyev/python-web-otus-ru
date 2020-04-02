@@ -4,18 +4,20 @@
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponseRedirect, HttpResponseForbidden
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView, TemplateView, FormView
 
-from education_app.education import lesson_cud_rights, get_user_course_rights
+from education_app.education import get_user_course_rights
 from education_app.forms import CourseForm, CourseEntryUpdateForm, CourseEntryCreateForm, LessonForm, \
     CourseAdminCreateForm, CourseAdminUpdateForm
 from education_app.models import CourseEntry, Lesson, CourseAdmin, Administrator
 from education_django.settings import EMAIL_HOST_USER
+from .const import USER_TYPE
 from .forms import SendEmailForm
 from .models import Course, Teacher, Student
 from .send_email import send_email_async
+from .users import get_user_type
 
 
 class MyCourseListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
@@ -33,7 +35,7 @@ class MyCourseListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         """
         Просматривать свои курсы может только студент
         """
-        return Student.get_by_user(self.request.user.id) is not None
+        return get_user_type(self.request.user.id) == USER_TYPE.STUDENT
 
 
 class CourseListView(ListView):
@@ -58,7 +60,7 @@ class CourseCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     def test_func(self) -> bool:
         """
-        Создавать курс может только администратор системы
+        Создавать курс может только суперпользователь
         """
         return self.request.user.is_superuser
 
@@ -77,18 +79,10 @@ class CourseUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self) -> bool:
         """
         Редактировать курс может:
-        - администратор системы
-        - администратор курса
+        - суперпользователь
+        - администратор этого курса
         """
-        if self.request.user.is_superuser:
-            return True
-
-        administrator = Administrator.get_by_user(self.request.user.id)
-        if administrator is not None:
-            course = get_object_or_404(Course, id=self.kwargs.get('id'))
-            if administrator in course.admins.all():
-                return True
-        return False
+        return Course.can_update(self.kwargs.get('id'), self.request.user)
 
 
 class CourseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -101,7 +95,7 @@ class CourseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self) -> bool:
         """
-        Удалять курс может только администратор системы
+        Удалять курс может только суперпользователь
         """
         return self.request.user.is_superuser
 
@@ -166,30 +160,12 @@ class StudentView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
     def test_func(self) -> bool:
         """
-        Просматривать стдудента могут:
-        - администратор системы
+        Просматривать студента могут:
+        - суперпользователь
         - сам студент
-        - администратор курса, на который записан студент
-        - преподаватель курса, на который записан студент
+        - студент, администратор или преподаватель курса, на который записан студент
         """
-        if self.request.user.is_superuser:
-            return True
-
-        student_obj = get_object_or_404(Student, id=self.kwargs.get('id'))
-        if student_obj.user == self.request.user:
-            return True
-
-        administrator = Administrator.get_by_user(self.request.user.id)
-        if administrator is not None:
-            return Course.objects.filter(courseentry__student__id=student_obj.id). \
-                filter(courseadmin__admin__id=administrator.id).exists()
-
-        teacher = Teacher.get_by_user(self.request.user.id)
-        if teacher is not None:
-            return Course.objects.filter(courseentry__student__id=student_obj.id). \
-                filter(lesson__teacher__id=teacher.id).exists()
-
-        return False
+        return Student.objects.for_user_queryset(self.request.user).filter(id=self.kwargs.get('id')).exists()
 
 
 class AboutView(TemplateView):
@@ -235,7 +211,7 @@ class CourseEntryCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView)
     def test_func(self) -> bool:
         """
         Создать запись на курс могут:
-        - администратор системы
+        - суперпользователь
         - администратор курса
         (не даем студенту записываться через эту форму, он записывается через create_my_course_entry)
         """
@@ -267,19 +243,13 @@ class CourseEntryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
     def test_func(self) -> bool:
         """
         Редактировать запись на курс могут:
-        - администратор системы
+        - суперпользователь
         - администратор курса
         """
         if self.request.user.is_superuser:
             return True
 
-        administrator = Administrator.get_by_user(self.request.user.id)
-        if administrator is not None:
-            course = get_object_or_404(Course, id=self.kwargs.get('id'))
-            if administrator in course.admins.all():
-                return True
-
-        return False
+        return Course.is_admin(self.kwargs.get('id'), self.request.user.id)
 
 
 class CourseEntryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -295,20 +265,14 @@ class CourseEntryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
     def test_func(self) -> bool:
         """
         Удалять запись на курс могут:
-        - администратор системы
+        - суперпользователь
         - администратор курса
         (студент может удалить свою запись на курс через MyCourseEntryDeleteView)
         """
         if self.request.user.is_superuser:
             return True
 
-        administrator = Administrator.get_by_user(self.request.user.id)
-        if administrator is not None:
-            course = get_object_or_404(Course, id=self.kwargs.get('id'))
-            if administrator in course.admins.all():
-                return True
-
-        return False
+        return Course.is_admin(self.kwargs.get('id'), self.request.user.id)
 
 
 class MyCourseEntryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -362,10 +326,10 @@ class LessonCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def test_func(self) -> bool:
         """
         Создавать урок могут:
-        - администратор системы
-        - администратор курса
+        - суперпользователь
+        - администратор курса, к которому относится урок
         """
-        return lesson_cud_rights(self.request.user, self.kwargs.get('id'))
+        return Lesson.can_cud(self.kwargs.get('id'), self.request.user)
 
 
 class LessonUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -382,10 +346,10 @@ class LessonUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self) -> bool:
         """
         Редактировать урок могут:
-        - администратор системы
-        - администратор курса
+        - суперпользователь
+        - администратор курса, к которому относится урок
         """
-        return lesson_cud_rights(self.request.user, self.kwargs.get('id'))
+        return Lesson.can_cud(self.kwargs.get('id'), self.request.user)
 
 
 class LessonDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -401,10 +365,10 @@ class LessonDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self) -> bool:
         """
         Создавать урок могут:
-        - администратор системы
-        - администратор курса
+        - суперпользователь
+        - администратор курса, к которому относится урок
         """
-        return lesson_cud_rights(self.request.user, self.kwargs.get('id'))
+        return Lesson.can_cud(self.kwargs.get('id'), self.request.user)
 
 
 class AdministratorView(DetailView):
@@ -413,6 +377,15 @@ class AdministratorView(DetailView):
     """
     model = Administrator
     pk_url_kwarg = 'id'
+
+    def test_func(self) -> bool:
+        """
+        Просматривать информацию об администраторе могут:
+        - суперпользователь
+        - сам администратор
+        - администратор, студент или преподаватель курса, на котором администратор является администратором
+        """
+        return Administrator.objects.for_user_queryset(self.request.user).filter(id=self.kwargs.get('id')).exists()
 
 
 class CourseAdminCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -433,7 +406,7 @@ class CourseAdminCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView)
 
     def test_func(self) -> bool:
         """
-        Добавлять администратора курса может администратор системы
+        Добавлять администратора курса может суперпользователь
         """
         return self.request.user.is_superuser
 
@@ -451,7 +424,7 @@ class CourseAdminUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
 
     def test_func(self) -> bool:
         """
-        Изменять администратора курса может администратор системы
+        Изменять администратора курса может суперпользователь
         """
         return self.request.user.is_superuser
 
@@ -468,7 +441,7 @@ class CourseAdminDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
 
     def test_func(self) -> bool:
         """
-        Удалять администратора курса может администратор системы
+        Удалять администратора курса может суперпользователь
         """
         return self.request.user.is_superuser
 
@@ -485,6 +458,8 @@ class ContactsView(FormView):
         """
         Отправка сообщения
         """
+        if not self.request.user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('users:login'))
         send_email_async(self.request.user, form.cleaned_data['message'], form.cleaned_data['theme'])
         return super().form_valid(form)
 
@@ -495,12 +470,6 @@ class ContactsView(FormView):
         context = super().get_context_data(**kwargs)
         context['contact_email'] = EMAIL_HOST_USER
         return context
-
-    def test_func(self) -> bool:
-        """
-        Отправлять сообщения могут только аутентифицированные пользователи
-        """
-        return self.request.user.is_authenicated
 
 
 class EmailSentView(TemplateView):

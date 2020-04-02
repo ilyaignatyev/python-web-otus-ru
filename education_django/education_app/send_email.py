@@ -8,7 +8,7 @@ import django_rq
 from django.contrib.auth.models import User
 
 from education_django.settings import EMAIL_HOST_USER
-from tasks import send_email
+from .tasks import send_email
 
 
 def send_email_async(from_user: User, message: str, theme: str):
@@ -18,7 +18,7 @@ def send_email_async(from_user: User, message: str, theme: str):
     :param message: Сообщение
     :param theme: Тема
     """
-    admin_emails = [user.email for user in User.objects.filter(is_superuser=True).all() if user.email]
+    admin_emails = list(User.objects.filter(is_superuser=True, email__isnull=False).values_list('email', flat=True))
     message = f'Сообщение от пользователя {from_user.get_full_name()} (email: {from_user.email})\n-----\n{message}'
     theme = f'USER MESSAGE. {theme}'
 

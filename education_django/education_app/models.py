@@ -4,7 +4,10 @@
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Q
 from django.urls import reverse_lazy
+
+from .managers import StudentManager, AdministratorManager, CourseEntryManager, CourseAdminManager, LessonManager
 
 
 class UserAbstract(models.Model):
@@ -19,6 +22,15 @@ class UserAbstract(models.Model):
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name}'
+
+    @staticmethod
+    def get_for_user(user_id: int) -> 'Teacher' or None:
+        """
+        Возвращает преподавателя по идентификатору пользователя
+        :param user_id: Идентификатор пользователя
+        :return: Преподаватель
+        """
+        return Teacher.objects.filter(user__id=user_id).first()
 
 
 class Teacher(UserAbstract):
@@ -39,6 +51,8 @@ class Student(UserAbstract):
     """
     Студент
     """
+    objects = StudentManager()
+
     @staticmethod
     def get_by_user(user_id: int) -> 'Student' or None:
         """
@@ -53,6 +67,8 @@ class Administrator(UserAbstract):
     """
     Администратор
     """
+    objects = AdministratorManager()
+
     @staticmethod
     def get_by_user(user_id: int) -> 'Administrator' or None:
         """
@@ -86,6 +102,30 @@ class Course(models.Model):
         """
         return reverse_lazy('education_app:course', kwargs={'id': course_id})
 
+    @staticmethod
+    def can_update(course_id: int, user: User):
+        """
+        Может ли редактировать курс переданный пользвоатель.
+        Курс может редактировать суперпользователь или администратор этого курса.
+        :param course_id: Курс
+        :param user: Пользователь
+        :return: Права на редактирование
+        """
+        if user.is_superuser:
+            return True
+
+        return CourseAdmin.objects.filter(course__id=course_id, admin__user__id=user.id).exists()
+
+    @staticmethod
+    def is_admin(course_id: int, user_id: int):
+        """
+        Является ли пользователь администратором курса
+        :param course_id:
+        :param user_id:
+        :return:
+        """
+        return CourseAdmin.objects.filter(course__id=course_id, admin__user__id=user_id).exists()
+
 
 class CourseEntry(models.Model):
     """
@@ -96,6 +136,8 @@ class CourseEntry(models.Model):
     date = models.DateTimeField(verbose_name='Дата записи на курс', auto_now_add=True)
     cost = models.IntegerField(verbose_name='Стоимость с учетом скидок', null=True, blank=True)
     paid = models.BooleanField(verbose_name='Курс оплачен', default=False)
+
+    objects = CourseEntryManager()
 
     class Meta:
         db_table = 'education_app_course_entry'
@@ -109,6 +151,8 @@ class CourseAdmin(models.Model):
     course = models.ForeignKey(Course, verbose_name='Курс', on_delete=models.CASCADE)
     admin = models.ForeignKey(Administrator, verbose_name='Администратор', on_delete=models.CASCADE)
     start = models.DateField(verbose_name='Дата начала')
+
+    objects = CourseAdminManager()
 
     class Meta:
         db_table = 'education_app_course_admin'
@@ -125,9 +169,29 @@ class Lesson(models.Model):
     start = models.DateTimeField(verbose_name='Дата и время начала')
     teacher = models.ForeignKey(Teacher, verbose_name='Преподаватель', null=True, blank=True, on_delete=models.PROTECT)
 
+    objects = LessonManager()
+
     class Meta:
         index_together = ['course', 'start']
         ordering = ['start', 'id']
+
+    @staticmethod
+    def can_cud(course_id: int, user: User):
+        """
+        Может ли создавать, редактировать, удалять урок переданный пользвоатель.
+        - создание: суперпользователь, администратор курса, к которому относится урок
+        - изменение: суперпользователь, администратор курса, к которому относится урок, преподаватель урока
+        - удаление: суперпользователь, администратор курса, к которому относится урок
+        :param course_id: Курс
+        :param user: Пользователь
+        :return: Права на создание, изменение, удаление
+        """
+        if user.is_superuser:
+            return True
+
+        return Lesson.objects.filter(Q(course__id=course_id) & (
+                                     Q(course__courseadmin__admin__user__id=user.id) |
+                                     Q(teacher__user__id=user.id))).exists()
 
     def __str__(self):
         return self.name

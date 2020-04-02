@@ -3,19 +3,9 @@
 """
 
 from django.contrib.auth.models import User
-from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 
-from education_app.models import Course, Student, Administrator, Teacher
-
-
-def get_user_courses_qs(user_id: int) -> QuerySet:
-    """
-    Возвращает queryset списка курсов переданного пользователя
-    :param user_id: Идентификатор пользователя
-    :return: Курсы
-    """
-    return Course.objects.filter(courseentry__student__user_id=user_id).filter(deleted=False)
+from .models import Course, Student, Administrator, Teacher
 
 
 def get_user_course_rights(user: User, course_id: int):
@@ -76,24 +66,3 @@ def get_user_course_rights(user: User, course_id: int):
     result['courseadmins_v'] = course_admin
 
     return result
-
-
-def lesson_cud_rights(user: User, course_id: int) -> bool:
-    """
-    Возвращает права текущего пользователя на создание/редактирование/удаление урока курса, это могут делать:
-    - администратор системы
-    - администратор курса
-    :param user: Пользователь
-    :param course_id: Идентификатор курса
-    :return: Права
-    """
-    if user.is_superuser:
-        return True
-
-    administrator = Administrator.get_by_user(user.id)
-    if administrator is not None:
-        course = get_object_or_404(Course, id=course_id)
-        if administrator in course.admins.all():
-            return True
-
-    return False

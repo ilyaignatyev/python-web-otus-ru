@@ -1,16 +1,27 @@
 """
 Роутинг
 """
+from django.urls import path, include
+from rest_framework import routers
 
-from django.urls import path
-
-from education_app.views import CourseView, CourseListView, CourseCreateView, CourseUpdateView, CourseDeleteView, \
+from .api_views import APITeacherViewSet, APIStudentViewSet, APIAdministratorViewSet, APICourseViewSet, \
+    APICourseEntryViewSet, APICourseAdminViewSet, APILessonViewSet
+from .views import CourseView, CourseListView, CourseCreateView, CourseUpdateView, CourseDeleteView, \
     MyCourseListView, TeacherListView, TeacherView, StudentView, CourseEntryCreateView, \
     CourseEntryUpdateView, CourseEntryDeleteView, LessonCreateView, LessonUpdateView, LessonDeleteView, \
     create_my_course_entry, CourseAdminCreateView, CourseAdminUpdateView, CourseAdminDeleteView, AdministratorView, \
     MyCourseEntryDeleteView, LessonView, AboutView, ContactsView, EmailSentView
 
 app_name = 'education_app'
+
+api_router = routers.DefaultRouter()
+api_router.register(r'teacher', APITeacherViewSet)
+api_router.register(r'student', APIStudentViewSet)
+api_router.register(r'administrator', APIAdministratorViewSet)
+api_router.register(r'course', APICourseViewSet)
+api_router.register(r'courseentry', APICourseEntryViewSet)
+api_router.register(r'courseadmin', APICourseAdminViewSet)
+api_router.register(r'lesson', APILessonViewSet)
 
 urlpatterns = [
     path('', CourseListView.as_view(), name='index'),
@@ -47,4 +58,6 @@ urlpatterns = [
 
     path('contacts/', ContactsView.as_view(), name='contacts'),
     path('email_sent/', EmailSentView.as_view(), name='email_sent'),
+
+    path('api/', include(api_router.urls))
 ]
