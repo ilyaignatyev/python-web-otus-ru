@@ -16,7 +16,7 @@
     margin-right: 5px;
 }
 
-.auth-state__login {
+.auth-state__login, .auth-state__register {
     margin-right: 5px;
 }
 

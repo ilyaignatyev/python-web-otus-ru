@@ -3,12 +3,15 @@
 """
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView, \
     PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
-from django.urls import path, include, reverse_lazy
+from django.urls import path, reverse_lazy
+
+from .views import RegisterView
 
 app_name = 'users'
 
 urlpatterns = [
     path('login/', LoginView.as_view(template_name='users/login.html'), name='login'),
+    path('register/', RegisterView.as_view(), name='register'),
     path('logout/', LogoutView.as_view(template_name='users/logged_out.html'), name='logout'),
     path('password_change/', PasswordChangeView.as_view(template_name='users/password_change.html'),
          name='password_change'),

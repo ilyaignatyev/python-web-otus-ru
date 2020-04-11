@@ -15,13 +15,13 @@ from .views import CourseView, CourseListView, CourseCreateView, CourseUpdateVie
 app_name = 'education_app'
 
 api_router = routers.DefaultRouter()
-api_router.register(r'teacher', APITeacherViewSet)
-api_router.register(r'student', APIStudentViewSet)
-api_router.register(r'administrator', APIAdministratorViewSet)
-api_router.register(r'course', APICourseViewSet)
-api_router.register(r'courseentry', APICourseEntryViewSet)
-api_router.register(r'courseadmin', APICourseAdminViewSet)
-api_router.register(r'lesson', APILessonViewSet)
+api_router.register(r'teacher', APITeacherViewSet, 'Teacher')
+api_router.register(r'student', APIStudentViewSet, 'Student')
+api_router.register(r'administrator', APIAdministratorViewSet, 'Administrator')
+api_router.register(r'course', APICourseViewSet, 'Course')
+api_router.register(r'courseentry', APICourseEntryViewSet, 'CourseEntry')
+api_router.register(r'courseadmin', APICourseAdminViewSet, 'CourseAdmin')
+api_router.register(r'lesson', APILessonViewSet, 'Lesson')
 
 urlpatterns = [
     path('', CourseListView.as_view(), name='index'),

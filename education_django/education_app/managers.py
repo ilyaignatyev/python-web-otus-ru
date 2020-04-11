@@ -6,13 +6,19 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
 
-from const import USER_TYPE
+from .const import USER_TYPE
 from .users import get_user_type
+
+
+class TeacherManager(models.Manager):
+    """
+    Менеджер модели преподавателя
+    """
 
 
 class StudentManager(models.Manager):
     """
-    Менеджер модели стдента
+    Менеджер модели студента
     """
     @staticmethod
     def for_user_queryset(user: User):

@@ -32,6 +32,7 @@
     <div class="auth-state">
         {% if not request.user.is_authenticated %}
             <a class="auth-state__login" href="{% url 'users:login' %}">Вход</a>
+            <a class="auth-state__register" href="{% url 'users:register' %}">Регистрация</a>
         {% else %}
             <span class="auth-state__current-user-name">{{ request.user.username }}</span>
             <a class="auth-state__logout" href="{% url 'users:logout' %}">Выход</a>

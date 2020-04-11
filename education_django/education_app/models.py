@@ -7,7 +7,8 @@ from django.db import models
 from django.db.models import Q
 from django.urls import reverse_lazy
 
-from .managers import StudentManager, AdministratorManager, CourseEntryManager, CourseAdminManager, LessonManager
+from .managers import TeacherManager, StudentManager, AdministratorManager, CourseEntryManager, CourseAdminManager, \
+    LessonManager
 
 
 class UserAbstract(models.Model):
@@ -37,6 +38,8 @@ class Teacher(UserAbstract):
     """
     Преподаватель
     """
+    objects = TeacherManager()
+
     @staticmethod
     def get_by_user(user_id: int) -> 'Teacher' or None:
         """
