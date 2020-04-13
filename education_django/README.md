@@ -219,7 +219,40 @@ query {
 
 Получение данных об одном курсе.
 ~~~
-
+query {
+  course(id:1) {
+    id
+    name
+    admins {
+      id
+      user {
+        firstName
+        lastName
+      }
+      about
+    }
+    students {
+      id
+      user {
+        firstName
+        lastName
+      }
+      about
+    }
+    lessonSet {
+      id
+      name
+      teacher {
+        id
+        user {
+          firstName
+          lastName
+        }
+        about
+      }
+    }
+  }  
+}
 ~~~
 
 Пример мутации. Изменение названия урока.
