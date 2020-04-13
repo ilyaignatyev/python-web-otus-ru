@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     "django_rq",
     'rest_framework',
+    'graphene_django',
 ]
 
 MIDDLEWARE = [

@@ -10,6 +10,7 @@
 - реализована регистрация пользователей, аутентификация, сброс пароля через email
 - реализована асинхронная отправка email со страницы "Контакты" (redis, django_rq)
 - реализовано логирование ошибок отправки email со страницы "Контакты"
+- реализовано получение данных через GraphQL
 
 ### Права
 #### Не аутентифицированный пользователь
@@ -171,4 +172,66 @@ ADMINS - список администраторов в формате [(name, e
 /api/courseentry/ - записи студентов на курс
 /api/courseadmin/ - связь администраторов с курсами
 /api/lesson/ - уроки
+~~~
+
+## GraphQL
+~~~
+/graphql/
+~~~
+
+Пример запроса. Получение данных о всех курсах, включая студентов, преподавателей, уроки, администраторов 
+~~~
+query {
+  allCourses {
+    id
+    name
+    admins {
+      id
+      user {
+        firstName
+        lastName
+      }
+      about
+    }
+    students {
+      id
+      user {
+        firstName
+        lastName
+      }
+      about
+    }
+    lessonSet {
+      id
+      name
+      teacher {
+        id
+        user {
+          firstName
+          lastName
+        }
+        about
+      }
+    }
+  }  
+}
+~~~
+
+Получение данных об одном курсе.
+~~~
+
+~~~
+
+Пример мутации. Изменение названия урока.
+~~~
+mutation {
+  changeLessonName(newName: "Новое название", lessonId:3){
+    result
+    lesson {
+      id
+      name
+      start
+    }
+  }
+}
 ~~~

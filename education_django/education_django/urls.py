@@ -8,6 +8,9 @@ from django.urls import path, include
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from graphene_django.views import GraphQLView
+from .schema import schema
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -16,6 +19,7 @@ urlpatterns = [
     path('django-rq/', include('django_rq.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('graphql/', GraphQLView.as_view(graphiql=True, schema=schema)),
 ]
 
 if settings.DEBUG:
