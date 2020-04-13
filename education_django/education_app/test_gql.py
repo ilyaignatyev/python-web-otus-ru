@@ -69,8 +69,12 @@ class GQLTestCase(GraphQLTestCase):
                 }
             }
         """, variables={'id': self.teacher.id})
-        content = json.loads(response.content)
         self.assertResponseNoErrors(response)
+        content = json.loads(response.content)
+        teacher_data = content['data']['teacher']
+        self.assertEqual(teacher_data['id'], str(self.teacher.id))
+        self.assertEqual(teacher_data['user']['firstName'], self.teacher.user.first_name)
+        self.assertEqual(teacher_data['user']['lastName'], self.teacher.user.last_name)
 
     def test_all_students(self):
         """
@@ -107,8 +111,12 @@ class GQLTestCase(GraphQLTestCase):
                 }
             }
         """, variables={'id': self.student.id})
-        content = json.loads(response.content)
         self.assertResponseNoErrors(response)
+        content = json.loads(response.content)
+        student_data = content['data']['student']
+        self.assertEqual(student_data['id'], str(self.student.id))
+        self.assertEqual(student_data['user']['firstName'], self.student.user.first_name)
+        self.assertEqual(student_data['user']['lastName'], self.student.user.last_name)
 
     def test_all_administrators(self):
         """
@@ -145,8 +153,12 @@ class GQLTestCase(GraphQLTestCase):
                 }
             }
         """, variables={'id': self.administrator.id})
-        content = json.loads(response.content)
         self.assertResponseNoErrors(response)
+        content = json.loads(response.content)
+        administrator_data = content['data']['administrator']
+        self.assertEqual(administrator_data['id'], str(self.administrator.id))
+        self.assertEqual(administrator_data['user']['firstName'], self.administrator.user.first_name)
+        self.assertEqual(administrator_data['user']['lastName'], self.administrator.user.last_name)
 
     def test_all_courses(self):
         """
@@ -231,8 +243,11 @@ class GQLTestCase(GraphQLTestCase):
                 }  
             }
         """, variables={'id': self.course.id})
-        content = json.loads(response.content)
         self.assertResponseNoErrors(response)
+        content = json.loads(response.content)
+        course_data = content['data']['course']
+        self.assertEqual(course_data['id'], str(self.course.id))
+        self.assertEqual(course_data['name'], self.course.name)
 
     def test_all_course_entries(self):
         """
@@ -287,8 +302,12 @@ class GQLTestCase(GraphQLTestCase):
                 }
             }
         """, variables={'id': self.course_entry.id})
-        content = json.loads(response.content)
         self.assertResponseNoErrors(response)
+        content = json.loads(response.content)
+        course_entry_data = content['data']['courseEntry']
+        self.assertEqual(course_entry_data['id'], str(self.course_entry.id))
+        self.assertEqual(course_entry_data['course']['id'], str(self.course.id))
+        self.assertEqual(course_entry_data['student']['id'], str(self.student.id))
 
     def test_all_course_admins(self):
         """
@@ -339,8 +358,12 @@ class GQLTestCase(GraphQLTestCase):
                 }
             }
         """, variables={'id': self.course_admin.id})
-        content = json.loads(response.content)
         self.assertResponseNoErrors(response)
+        content = json.loads(response.content)
+        course_admin_data = content['data']['courseAdmin']
+        self.assertEqual(course_admin_data['id'], str(self.course_admin.id))
+        self.assertEqual(course_admin_data['course']['id'], str(self.course.id))
+        self.assertEqual(course_admin_data['admin']['id'], str(self.administrator.id))
 
     def test_all_lessons(self):
         """
@@ -395,5 +418,32 @@ class GQLTestCase(GraphQLTestCase):
                 }
             }
         """, variables={'id': self.lesson.id})
-        content = json.loads(response.content)
         self.assertResponseNoErrors(response)
+        content = json.loads(response.content)
+        lesson_data = content['data']['lesson']
+        self.assertEqual(lesson_data['id'], str(self.lesson.id))
+        self.assertEqual(lesson_data['name'], self.lesson.name)
+
+    def test_change_lesson_name_mutation(self):
+        """
+        Тест изменения названия урока
+        """
+        lesson = LessonFactory(name='Old name', teacher=self.teacher, course=self.course,
+                               start=datetime.datetime(2020, 11, 1, 19, 0, 0))
+        response = self.query("""
+            mutation ($id: Int!) {
+                changeLessonName(newName: "New name", lessonId:$id){
+                    result
+                    lesson {
+                        id
+                        name
+                        start
+                    }
+                }
+            }
+        """, variables={'id': lesson.id})
+        self.assertResponseNoErrors(response)
+        content = json.loads(response.content)
+        lesson_data = content['data']['changeLessonName']['lesson']
+        self.assertEqual(lesson_data['id'], str(lesson.id))
+        self.assertEqual(lesson_data['name'], 'New name')
