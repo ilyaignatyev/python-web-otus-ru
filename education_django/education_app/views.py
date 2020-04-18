@@ -29,7 +29,10 @@ class MyCourseListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     template_name = 'education_app/my_course_list.html'
 
     def get_queryset(self):
-        return CourseEntry.objects.filter(student=self.request.user.id)
+        """
+        Возвращает queryset записей текущего пользователя-студента на курсы
+        """
+        return CourseEntry.objects.with_course_data.filter(student=self.request.user.id)
 
     def test_func(self) -> bool:
         """
@@ -44,8 +47,8 @@ class CourseListView(ListView):
     """
     model = Course
     context_object_name = 'courses'
-    paginate_by = 2
-    queryset = Course.objects.filter(deleted=False)
+    paginate_by = 20
+    queryset = Course.objects.active
 
 
 class CourseCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -137,10 +140,10 @@ class TeacherListView(ListView):
     """
     model = Teacher
     context_object_name = 'teachers'
-    paginate_by = 2
+    paginate_by = 20
 
     def get_queryset(self):
-        return self.model.objects.filter(user__is_active=True)
+        return self.model.objects.filter(user__is_active=True).select_related('user')
 
 
 class TeacherView(DetailView):

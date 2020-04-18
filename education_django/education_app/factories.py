@@ -1,6 +1,7 @@
 """
 Фабрики объектов
 """
+import datetime
 
 import factory
 from .models import Teacher, Student, Administrator, Course, CourseEntry, CourseAdmin, Lesson
@@ -14,6 +15,12 @@ class UserFactory(factory.DjangoModelFactory):
     class Meta:
         model = User
 
+    username = factory.Sequence(lambda n: f'user{n}')
+    first_name = factory.Faker('first_name')
+    last_name = factory.Faker('last_name')
+    email = factory.Faker('email')
+    password = factory.PostGenerationMethodCall('set_password', '123')
+
 
 class TeacherFactory(factory.DjangoModelFactory):
     """
@@ -23,6 +30,7 @@ class TeacherFactory(factory.DjangoModelFactory):
         model = Teacher
 
     user = factory.SubFactory(UserFactory)
+    about = factory.Faker('text', max_nb_chars=1000)
 
 
 class StudentFactory(factory.DjangoModelFactory):
@@ -33,6 +41,7 @@ class StudentFactory(factory.DjangoModelFactory):
         model = Student
 
     user = factory.SubFactory(UserFactory)
+    about = factory.Faker('text', max_nb_chars=1000)
 
 
 class AdministratorFactory(factory.DjangoModelFactory):
@@ -43,6 +52,7 @@ class AdministratorFactory(factory.DjangoModelFactory):
         model = Administrator
 
     user = factory.SubFactory(UserFactory)
+    about = factory.Faker('text', max_nb_chars=1000)
 
 
 class CourseFactory(factory.DjangoModelFactory):
@@ -52,6 +62,11 @@ class CourseFactory(factory.DjangoModelFactory):
     class Meta:
         model = Course
 
+    name = factory.Faker('sentence')
+    description = factory.Faker('paragraph')
+    start = factory.Faker('date_between_dates', date_start=datetime.date(2015, 1, 1), date_end=datetime.date(2021, 12, 31))
+    cost = factory.Faker('random_int', min=2000, max=100000)
+
 
 class CourseEntryFactory(factory.DjangoModelFactory):
     """
@@ -59,6 +74,10 @@ class CourseEntryFactory(factory.DjangoModelFactory):
     """
     class Meta:
         model = CourseEntry
+
+    date = factory.Faker('date')
+    cost = factory.Faker('random_int', min=2000, max=100000)
+    paid = factory.Faker('random_element', elements=[True, False])
 
 
 class CourseAdminFactory(factory.DjangoModelFactory):
@@ -68,6 +87,8 @@ class CourseAdminFactory(factory.DjangoModelFactory):
     class Meta:
         model = CourseAdmin
 
+    start = factory.Faker('date')
+
 
 class LessonFactory(factory.DjangoModelFactory):
     """
@@ -75,3 +96,7 @@ class LessonFactory(factory.DjangoModelFactory):
     """
     class Meta:
         model = Lesson
+
+    name = factory.Faker('sentence')
+    start = factory.Faker('date_time_this_year', after_now=True)
+    description = factory.Faker('text', max_nb_chars=1000)

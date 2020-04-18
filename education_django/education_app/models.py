@@ -1,14 +1,13 @@
 """
 Модели
 """
-
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
 from django.urls import reverse_lazy
 
 from .managers import TeacherManager, StudentManager, AdministratorManager, CourseEntryManager, CourseAdminManager, \
-    LessonManager
+    LessonManager, CourseManager
 
 
 class UserAbstract(models.Model):
@@ -65,6 +64,12 @@ class Student(UserAbstract):
         """
         return Student.objects.filter(user__id=user_id).first()
 
+    def course_entries_with_courses(self):
+        """
+        Возвращает записи на курсы с данными по курсам
+        """
+        return self.courseentry_set.select_related('course').order_by('course__start')
+
 
 class Administrator(UserAbstract):
     """
@@ -86,6 +91,8 @@ class Course(models.Model):
     """
     Курс
     """
+    objects = CourseManager()
+
     name = models.CharField(verbose_name='Название', max_length=200)
     description = models.TextField(verbose_name='Описание', blank=True)
     start = models.DateField(verbose_name='Дата начала', db_index=True)
@@ -128,6 +135,24 @@ class Course(models.Model):
         :return:
         """
         return CourseAdmin.objects.filter(course__id=course_id, admin__user__id=user_id).exists()
+
+    def lessons_with_teachers(self):
+        """
+        Возвращает уроки курса с данными по учителям
+        """
+        return self.lesson_set.select_related('teacher').select_related('teacher__user').order_by('start')
+
+    def course_entries_with_students(self):
+        """
+        Возвращает записи студентов на курс с данными по студентам
+        """
+        return self.courseentry_set.select_related('student').select_related('student__user')
+
+    def course_admins_with_admins(self):
+        """
+        Возвращает связь администраторов с курсом с данными по администраторам
+        """
+        return self.courseadmin_set.select_related('admin').select_related('admin__user')
 
 
 class CourseEntry(models.Model):

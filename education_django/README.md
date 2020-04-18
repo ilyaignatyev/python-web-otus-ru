@@ -152,6 +152,14 @@ python manage.py makemigrations
 python manage.py migrate
 ~~~
 
+## Заполнение БД тестовыми данными
+~~~
+python manage.py create_db_test_data
+
+Логин/пароль суперпользователя - superuser/123
+Пароли всех пользователей - 123
+~~~
+
 ## Настройка
 Необходимо создать файл local_settings.py рядом с settings.py, в котором указать следующие параметры:
 ~~~

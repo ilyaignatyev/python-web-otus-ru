@@ -2,9 +2,10 @@
 Формы
 """
 
-from django.forms import ModelForm, Form, CharField, Textarea
+from django.forms import ModelForm, Form, CharField, Textarea, ModelChoiceField
 
 from education_app.models import Course, CourseEntry, Lesson, CourseAdmin
+from .models import Administrator, Student, Teacher
 
 
 class CourseForm(ModelForm):
@@ -27,6 +28,8 @@ class CourseEntryForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['course'].disabled = True
+
+    student = ModelChoiceField(label='Студент', queryset=Student.objects.with_user_data)
 
 
 class CourseEntryCreateForm(CourseEntryForm):
@@ -58,6 +61,8 @@ class LessonForm(ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['course'].disabled = True
 
+    teacher = ModelChoiceField(label='Преподаватель', queryset=Teacher.objects.with_user_data)
+
 
 class CourseAdminForm(ModelForm):
     """
@@ -67,6 +72,7 @@ class CourseAdminForm(ModelForm):
         model = CourseAdmin
         fields = ['course', 'admin', 'start']
 
+    admin = ModelChoiceField(label='Администратор', queryset=Administrator.objects.with_user_data)
 
 class CourseAdminCreateForm(CourseAdminForm):
     """

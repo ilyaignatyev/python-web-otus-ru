@@ -32,7 +32,7 @@
         </tr>
         </thead>
         <tbody>
-        {% for lesson in course.lesson_set.all %}
+        {% for lesson in course.lessons_with_teachers.all %}
             <tr>
                 <th scope="row">{{ forloop.counter }}</th>
                 <td><a href="{% url 'education_app:lesson' lesson.id %}">{{ lesson.name }}</a></td>
@@ -74,7 +74,7 @@
             </tr>
             </thead>
             <tbody>
-            {% for course_entry in course.courseentry_set.all %}
+            {% for course_entry in course.course_entries_with_students.all %}
                 <tr>
                     <th scope="row">{{ forloop.counter }}</th>
                     <td>
@@ -113,7 +113,7 @@
             </tr>
             </thead>
             <tbody>
-            {% for course_admin in course.courseadmin_set.all %}
+            {% for course_admin in course.course_admins_with_admins.all %}
                 <tr>
                     <th scope="row">{{ forloop.counter }}</th>
                     <td>

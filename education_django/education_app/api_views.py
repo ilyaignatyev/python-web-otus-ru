@@ -16,7 +16,7 @@ class APITeacherViewSet(viewsets.ModelViewSet):
     """
     Преподаватель
     """
-    queryset = Teacher.objects.all()
+    queryset = Teacher.objects.with_user_data
     permission_classes = (TeacherPermissions,)
 
     def get_serializer_class(self):
@@ -65,7 +65,7 @@ class APICourseViewSet(viewsets.ModelViewSet):
     """
     Курс
     """
-    queryset = Course.objects.all()
+    queryset = Course.objects.active
     serializer_class = CourseSerializer
     permission_classes = (CoursePermissions,)
 

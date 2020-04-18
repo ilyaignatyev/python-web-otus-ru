@@ -1,6 +1,7 @@
 """
 Менеджеры для моделей
 """
+import datetime
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -14,6 +15,13 @@ class TeacherManager(models.Manager):
     """
     Менеджер модели преподавателя
     """
+    @property
+    def with_user_data(self):
+        """
+        Возвращает отсортированный queryset преподавателей с данными профилей
+        """
+        from .models import Teacher
+        return Teacher.objects.select_related('user').order_by('user__first_name', 'user__last_name')
 
 
 class StudentManager(models.Manager):
@@ -29,7 +37,7 @@ class StudentManager(models.Manager):
         :return: Студенты
         """
         from .models import Student
-        query = Student.objects
+        query = Student.objects.select_related('user').order_by('user__first_name', 'user__last_name')
 
         if user.is_superuser:
             return query
@@ -49,6 +57,14 @@ class StudentManager(models.Manager):
 
         return query.none()
 
+    @property
+    def with_user_data(self):
+        """
+        Возвращает отсортированный queryset студентов с данными профилей
+        """
+        from .models import Student
+        return Student.objects.select_related('user').order_by('user__first_name', 'user__last_name')
+
 
 class AdministratorManager(models.Manager):
     """
@@ -64,7 +80,7 @@ class AdministratorManager(models.Manager):
         :return: Админитраторы
         """
         from .models import Administrator
-        query = Administrator.objects
+        query = Administrator.objects.select_related('user').order_by('user__first_name', 'user__last_name')
 
         if user.is_superuser:
             return query
@@ -84,6 +100,27 @@ class AdministratorManager(models.Manager):
                                 Q(courseadmin__course__courseadmin__admin__user__id=user.id)).distinct()
 
         return query.none()
+
+    @property
+    def with_user_data(self):
+        """
+        Возвращает отсортированный queryset администраторов с данными профилей
+        """
+        from .models import Administrator
+        return Administrator.objects.select_related('user').order_by('user__first_name', 'user__last_name')
+
+
+class CourseManager(models.Manager):
+    """
+    Менеджер модели курса
+    """
+    @property
+    def active(self):
+        """
+        Возвращает активные для записи курсы (которые еще не начались)
+        """
+        from .models import Course
+        return Course.objects.filter(deleted=False).filter(start__gte=datetime.date.today())
 
 
 class CourseEntryManager(models.Manager):
@@ -115,6 +152,14 @@ class CourseEntryManager(models.Manager):
             return query.filter(course__courseadmin__admin__user__id=user.id).distinct()
 
         return query.none()
+
+    @property
+    def with_course_data(self):
+        """
+        Возвращает отсортированный queryset записей студентов на курсы с данными профилей
+        """
+        from .models import CourseEntry
+        return CourseEntry.objects.select_related('course').order_by('course__start', 'course_id')
 
 
 class CourseAdminManager(models.Manager):
