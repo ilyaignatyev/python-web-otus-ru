@@ -12,7 +12,7 @@ setup(
     author_email='ilyaignatyev@gmail.com',
     description='Searches urls on sites',
     install_requires=[
-        'lxml==4.4.2',
+        'lxml==4.6.2',
         'beautifulsoup4==4.8.1',
         'fake-useragent==0.1.11',
         'validators==0.14.1'
